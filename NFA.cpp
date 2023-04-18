@@ -7,7 +7,6 @@
 #include <fstream>
 #include <iomanip>
 #include <algorithm>
-#include <set>
 #include <queue>
 #include "json.hpp"
 
@@ -104,75 +103,58 @@ DFA NFA::toDFA() {
     dfa.setAlfabet(alfabetString);
 
     // Start state
-    dfa.setStartState(startState);
+    dfa.setStartState("{"+startState+"}");
 
     // States & transitionFunction
-    // Stap 1: Initialiseer de vector van DFA-toestanden
-    vector<string> dfaStates;
-    //= {startState};
+    // Stap 1: Initialiseer de verzameling verwerkte toestanden
+    vector<string> processedStates;
+    processedStates.push_back("{"+startState+"}");
 
-    // Stap 2: Initialiseer de verzameling verwerkte toestanden
-    set<vector<string>> processedStates = {{startState}};
+    // Stap 2: Initialiseer de wachtrij met alle staten van de NFA
+    queue<string> stateQueue;
+    stateQueue.push("{"+startState+"}");
 
-    // Stap 3: Initialiseer de wachtrij met alle staten van de NFA
-    queue<vector<string>> stateQueue;
-    for (int i = 0; i < states.size(); ++i) {
-        stateQueue.push({states[i]});
-    }
-
-    // Stap 4: Verwerk de wachtrij
+    // Stap 3: Verwerk de wachtrij
     while (!stateQueue.empty()) {
         // a. Haal de volgende toestand uit de wachtrij
-        vector<string> nfaStates = stateQueue.front();
+        vector<string> nfaStates = getNFAStatesFromString(stateQueue.front());
         stateQueue.pop();
+
         // b. Genereer de overgangen voor elke invoer van het alfabet van de NFA
-        //map<char, vector<string>> dfaTransitions;
         for (char c : alfabet) {
+            // b' Bereken alle staten die de nfaState kan bereiken
             vector<string> nfaTransitions;
             for (string nfaState : nfaStates) {
                 auto it = transitionFunction.find(make_pair(nfaState, c));
                 if (it != transitionFunction.end()) {
                     nfaTransitions.insert(nfaTransitions.end(), it->second.begin(), it->second.end());
                 }
+
             }
             sort(nfaTransitions.begin(), nfaTransitions.end());
             nfaTransitions.erase(unique(nfaTransitions.begin(), nfaTransitions.end()), nfaTransitions.end());
             if (!nfaTransitions.empty()) {
                 dfa.addTransition(getStringFromNFAStates(nfaStates), c, getStringFromNFAStates(nfaTransitions));
+                // b'' Kijkt in de verzameling van states indien de "to" State al verwerkt is TODO: Zoek een manier om in ons geval "Q1" ook toe te voegen
+                if (find(processedStates.begin(), processedStates.end(), getStringFromNFAStates(nfaTransitions)) == processedStates.end()) {
+                    stateQueue.push(getStringFromNFAStates(nfaTransitions));
+                }
             }
         }
-        // c. Voeg de nieuwe DFA-toestanden toe aan de vector van DFA-toestanden en de wachtrij als ze nog niet eerder zijn verwerkt
-        /*for (const auto& pair : dfaTransitions) {
-            const vector<string>& nfaTransitions = pair.second;
-            if (processedStates.find(nfaTransitions)  == processedStates.end()) {
-                dfaStates.push_back(getStringFromNFAStates(nfaTransitions));
-                stateQueue.push(nfaTransitions);
-                processedStates.insert(nfaTransitions);
-            }
-        }
-        // d. Voeg de nieuwe overgangen toe aan de overgangsfunctie van de DFA
-        string dfaState = getStringFromNFAStates(nfaStates);
-        dfaStates.push_back(dfaState);
-        for (const auto& pair : dfaTransitions) {
-            char inputSymbol = pair.first;
-            const vector<string>& nfaTransitions = pair.second;
-            string dfaTargetState = getStringFromNFAStates(nfaTransitions);
-            dfa.addTransition(dfaState, inputSymbol, dfaTargetState);
-        }*/
-        // e. Markeer de huidige toestand als verwerkt
-        processedStates.insert(nfaStates);
+        // c. Markeer de huidige toestand als verwerkt en voeg dazn ook toe aan de staten van de DFA
+        dfa.addState(getStringFromNFAStates(nfaStates));
+        processedStates.push_back(getStringFromNFAStates(nfaStates));
     }
 
-    // Stap 5: Stel de accepterende toestanden in voor de DFA
-    for (string dfaState : dfaStates) {
-        vector<string> nfaStates = getNFAStatesFromString(dfaState);
-        for (string nfaState : nfaStates) {
-            if (find(acceptStates.begin(), acceptStates.end(), nfaState) != acceptStates.end()) {
-                dfa.addAcceptState(dfaState);
-                break;
-            }
+    // Stap 4: Bepaal alle accepterende toestanden in voor de DFA
+    /*vector<string> nfaStates = getNFAStatesFromString(dfa.);
+    for (string nfaState : nfaStates) {
+        if (find(acceptStates.begin(), acceptStates.end(), nfaState) != acceptStates.end()) {
+            dfa.addAcceptState(dfaState);
+            break;
         }
-    }
+    }*/
+
 
     return dfa;
 }

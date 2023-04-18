@@ -37,6 +37,9 @@ public:
     void setStartState(const string &startState);
     void setAcceptStates(const vector<string> &acceptStates);
     void addAcceptState(const string &state);
+
+    // Getters
+
 };
 
 
