@@ -30,6 +30,7 @@ public:
 
     // Setters
     void setStates(const vector<string> &states);
+    void addState(const string &state);
     void setAlfabet(const string &alfabet);
     void setTransitionFunction(const map<pair<string, char>, string> &transitionFunction);
     void addTransition(const string &fromState, const char &input, const string &toState);

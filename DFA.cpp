@@ -124,6 +124,10 @@ void DFA::setStates(const vector<string> &states) {
     DFA::states = states;
 }
 
+void DFA::addState(const std::string &state) {
+    DFA::states.push_back(state);
+}
+
 void DFA::setAlfabet(const string &alfabet) {
     vector<char> chars;
     for (int i = 0; i < alfabet.size(); ++i) {
