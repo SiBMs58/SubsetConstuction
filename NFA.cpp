@@ -145,14 +145,14 @@ DFA NFA::toDFA() {
             nfaTransitions.erase(unique(nfaTransitions.begin(), nfaTransitions.end()), nfaTransitions.end());
             if (!nfaTransitions.empty()) {
                 dfa.addTransition(getStringFromNFAStates(nfaStates), c, getStringFromNFAStates(nfaTransitions));
-                // b'' Kijkt in de verzameling van states indien de "to" State al verwerkt is TODO: Zoek een manier om in ons geval "Q1" ook toe te voegen
+                // b'' Kijkt in de verzameling van states indien de "to" State al verwerkt is
                 if (find(processedStates.begin(), processedStates.end(), getStringFromNFAStates(nfaTransitions)) == processedStates.end()) {
                     stateQueue.push(getStringFromNFAStates(nfaTransitions));
-                    for (int i = 0; i < nfaTransitions.size(); ++i) {
+                    /*for (int i = 0; i < nfaTransitions.size(); ++i) {
                         if (!stringExistsInQueue(stateQueue, "{"+nfaTransitions[i]+"}") || (find(processedStates.begin(), processedStates.end(), "{"+nfaTransitions[i]+"}") != processedStates.end())) {
                             stateQueue.push("{"+nfaTransitions[i]+"}");
                         }
-                    }
+                    }*/
                 }
             }
         }
