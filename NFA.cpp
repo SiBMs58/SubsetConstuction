@@ -165,13 +165,17 @@ DFA NFA::toDFA() {
     }
 
     // Stap 4: Bepaal alle accepterende toestanden in voor de DFA
-    /*vector<string> nfaStates = getNFAStatesFromString(dfa.);
-    for (string nfaState : nfaStates) {
-        if (find(acceptStates.begin(), acceptStates.end(), nfaState) != acceptStates.end()) {
-            dfa.addAcceptState(dfaState);
-            break;
+    vector<string> dfaAcceptStates;
+    for (string dfaState : dfa.getStates()) {
+        vector<string> nfaStates = getNFAStatesFromString(dfaState);
+        for (string nfaState : nfaStates) {
+            if (find(acceptStates.begin(), acceptStates.end(), nfaState) != acceptStates.end()) {
+                dfaAcceptStates.push_back(dfaState);
+                break;
+            }
         }
-    }*/
+    }
+    dfa.setAcceptStates(dfaAcceptStates);
 
 
     return dfa;
