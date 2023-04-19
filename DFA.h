@@ -39,7 +39,7 @@ public:
     void addAcceptState(const string &state);
 
     // Getters
-
+    const vector<string> &getStates() const;
 };
 
 

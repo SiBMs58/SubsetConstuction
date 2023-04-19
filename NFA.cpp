@@ -65,6 +65,16 @@ NFA::NFA(const string inputFile) {
     setTransitionFunction(transitionFunction);
 }
 
+bool stringExistsInQueue(queue<string> q, string s) {
+    while (!q.empty()) {
+        if (q.front() == s) {
+            return true;
+        }
+        q.pop();
+    }
+    return false;
+}
+
 vector<string> getNFAStatesFromString(const string& state_string) {
     vector<string> nfa_states;
     string state_without_braces = state_string.substr(1, state_string.length() - 2);
@@ -138,11 +148,19 @@ DFA NFA::toDFA() {
                 // b'' Kijkt in de verzameling van states indien de "to" State al verwerkt is TODO: Zoek een manier om in ons geval "Q1" ook toe te voegen
                 if (find(processedStates.begin(), processedStates.end(), getStringFromNFAStates(nfaTransitions)) == processedStates.end()) {
                     stateQueue.push(getStringFromNFAStates(nfaTransitions));
+                    for (int i = 0; i < nfaTransitions.size(); ++i) {
+                        if (!stringExistsInQueue(stateQueue, "{"+nfaTransitions[i]+"}") || (find(processedStates.begin(), processedStates.end(), "{"+nfaTransitions[i]+"}") != processedStates.end())) {
+                            stateQueue.push("{"+nfaTransitions[i]+"}");
+                        }
+                    }
                 }
             }
         }
-        // c. Markeer de huidige toestand als verwerkt en voeg dazn ook toe aan de staten van de DFA
-        dfa.addState(getStringFromNFAStates(nfaStates));
+        // c. Markeer de huidige toestand als verwerkt en voeg dazn ook toe aan de staten van de DFA als deze nog niet bestaat natuurlijk
+        vector<string> dfaState = dfa.getStates();
+        if (find(dfaState.begin(), dfaState.end(), getStringFromNFAStates(nfaStates)) == dfaState.end()) {
+            dfa.addState(getStringFromNFAStates(nfaStates));
+        }
         processedStates.push_back(getStringFromNFAStates(nfaStates));
     }
 
